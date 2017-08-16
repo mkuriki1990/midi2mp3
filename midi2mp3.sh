@@ -1,19 +1,30 @@
 #/bin/zsh
 
-# midi ���� wav �ե�������Ѵ�
-for files in *.midi
+# 引数のチェックをする
+if [ $# -eq 0 ]; then
+	echo "引数に midi ファイルのパスが必要"
+	exit 1
+fi
+
+# midi から wav ファイルに変換
+# for files in *.midi
+for files in "$@"
 do
-	fluidsynth -F ${files/midi/wav} ./TimGM6mb.sf2 $files
+	fluidsynth -F ${files/midi/wav} ./TimGM6mb.sf2 $files # ${var/str1/str2} は var の中で str1 を str2 に置換
 done
 
-# wav �� ����ץ�󥰥졼�� 8 bit �� mp3 ���Ѵ�
-for files in *.wav
+# wav を サンプリングレート 8 bit の mp3 に変換
+for files in "$@"
 do
-	lame --bitwidth 8 -b 8 $files
+	echo $files
+	lame --bitwidth 8 -b 8 ${files/midi/wav}
+	# 仕上げに .wav を削除
+	rm ${files/midi/wav}
 done
 
-# iPhone �ǥ��ץ�Ǥ� midi �ե����뤬ľ�ܺ����Ǥ��ʤ�����, 
-# mp3 �ե�������Ѵ��������Ѥ���. 
-# midi -> wav -> mp3 ���Ѵ�����
-# �Ѵ��ˤ� fluidsynth ���ޥ�ɤ��Ѥ�, �������󥵤Υ������ե�����Ȥ��� TimGM6mb.sf2 �����Ѥ���. 
-# mp3 ���Ѵ�����ݤˤ� lame ���ޥ�ɤ��Ѥ��� ����ץ�󥰥졼�Ȥ� 8bit ���Ѵ�����. 
+
+# iPhone 版アプリでは midi ファイルが直接再生できないため, 
+# mp3 ファイルに変換して利用する. 
+# midi -> wav -> mp3 に変換する
+# 変換には fluidsynth コマンドを用い, シーケンサのソースファイルとして TimGM6mb.sf2 を利用する. 
+# mp3 に変換する際には lame コマンドを用いて サンプリングレートを 8bit に変換する. 
